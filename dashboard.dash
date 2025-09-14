@@ -1,0 +1,128 @@
+import dash
+from dash import dcc, html
+import pandas as pd
+import plotly.express as px
+
+sales_data = {
+    '2022': {
+        'monthly': [
+            {'month': 'Jan', 'sales': 12, 'revenue': 6},
+            {'month': 'Feb', 'sales': 15, 'revenue': 7},
+            {'month': 'Mar', 'sales': 18, 'revenue': 9}
+        ],
+        'category': [
+            {'category': 'Electronics', 'sales': 15},
+            {'category': 'Home Goods', 'sales': 8}
+        ]
+    },
+    '2023': {
+        'monthly': [
+            {'month': 'Jan', 'sales': 13, 'revenue': 6},
+            {'month': 'Feb', 'sales': 17, 'revenue': 8},
+            {'month': 'Mar', 'sales': 20, 'revenue': 10}
+        ],
+        'category': [
+            {'category': 'Electronics', 'sales': 18},
+            {'category': 'Home Goods', 'sales': 9}
+        ]
+    }
+}
+
+app = dash.Dash(__name__)
+app.layout = html.Div([
+    html.H1("Company Sales Performance Dashboard", style={'textAlign': 'center'}),
+    html.P("Visualizing key sales metrics with interactive data filtering.", style={'textAlign': 'center', 'color': '#c9d1d9'}),
+
+    html.Div([
+        html.Label("Select Year:", style={'color': '#c9d1d9'}),
+        dcc.Dropdown(
+            id='year-dropdown',
+            options=[{'label': year, 'value': year} for year in sales_data.keys()],
+            value='2022',  # Set initial value
+            clearable=False,
+            style={'backgroundColor': '#21262d', 'color': '#c9d1d9', 'borderColor': '#30363d'}
+        )
+    ], style={'padding': '1.5rem', 'border': '1px solid #30363d', 'borderRadius': '0.5rem', 'margin': '2rem auto', 'maxWidth': '600px'}),
+
+    html.Div([
+        html.Div([
+            html.H2("Monthly Sales", style={'color': '#ffffff'}),
+            dcc.Graph(id='monthly-sales-chart')
+        ], style={'backgroundColor': '#161b22', 'padding': '1.5rem', 'borderRadius': '0.5rem', 'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.1)'}),
+
+        html.Div([
+            html.H2("Sales by Product Category", style={'color': '#ffffff'}),
+            dcc.Graph(id='category-sales-chart')
+        ], style={'backgroundColor': '#161b22', 'padding': '1.5rem', 'borderRadius': '0.5rem', 'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.1)'}),
+
+        html.Div([
+            html.H2("Revenue Trend", style={'color': '#ffffff'}),
+            dcc.Graph(id='revenue-trend-chart')
+        ], style={'backgroundColor': '#161b22', 'padding': '1.5rem', 'borderRadius': '0.5rem', 'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.1)'})
+    ], style={'display': 'grid', 'gridTemplateColumns': 'repeat(auto-fit, minmax(400px, 1fr))', 'gap': '1.5rem'}),
+
+])
+  @app.callback(
+    [
+        dash.Output('monthly-sales-chart', 'figure'),
+        dash.Output('category-sales-chart', 'figure'),
+        dash.Output('revenue-trend-chart', 'figure')
+    ],
+    [dash.Input('year-dropdown', 'value')]
+)
+def update_charts(selected_year):
+    """Updates the charts based on the selected year from the dropdown."""
+    year_data = sales_data[selected_year]
+
+    monthly_df = pd.DataFrame(year_data['monthly'])
+    fig_monthly = px.bar(
+        monthly_df,
+        x='month',
+        y='sales',
+        title='Monthly Sales',
+        color_discrete_sequence=['#2f81f7']
+    )
+    fig_monthly.update_layout(
+        plot_bgcolor='#161b22',
+        paper_bgcolor='#161b22',
+        font_color='#c9d1d9',
+        xaxis_title='',
+        yaxis_title='Sales ($)',
+        yaxis_tickprefix='$',
+        yaxis_tickformat=',.0s'
+    )
+    category_df = pd.DataFrame(year_data['category'])
+    fig_category = px.pie(
+        category_df,
+        names='category',
+        values='sales',
+        title='Sales by Product Category'
+    )
+    fig_category.update_layout(
+        plot_bgcolor='#161b22',
+        paper_bgcolor='#161b22',
+        font_color='#c9d1d9',
+        legend_title_text='Categories'
+    )
+
+    fig_revenue = px.line(
+        monthly_df,
+        x='month',
+        y='revenue',
+        title='Revenue Trend',
+        markers=True,
+        color_discrete_sequence=['#2f81f7']
+    )
+    fig_revenue.update_layout(
+        plot_bgcolor='#161b22',
+        paper_bgcolor='#161b22',
+        font_color='#c9d1d9',
+        xaxis_title='',
+        yaxis_title='Revenue ($)',
+        yaxis_tickprefix='$',
+        yaxis_tickformat=',.0s'
+    )
+     return fig_monthly, fig_category, fig_revenue
+
+if __name__ == '__main__':
+    app.run(debug=True)
