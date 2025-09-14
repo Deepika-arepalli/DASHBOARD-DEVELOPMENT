@@ -14,4 +14,4 @@ Mentor: Neela Santhosh
 
 *OUTPUT:
 
-<!-- Uploading "Screenshot 2025-09-11 222347.png"... -->
+<img width="1542" height="880" alt="Image" src="https://github.com/user-attachments/assets/abea8c29-0a71-4524-92a3-861b1a5bb693" />
